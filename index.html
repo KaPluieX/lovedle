@@ -309,7 +309,18 @@ function saveNames(skip) {
   updateHomeTally();
   if (pendingPartnerEntry) {
     pendingPartnerEntry = false;
-    showPartnerEntry();
+    if (skip) {
+      // Skipped names — go directly to partner entry without the names gate
+      const setterName = partnerSetterIdx === 0 ? names.p1 : names.p2;
+      const guesserName = partnerSetterIdx === 0 ? names.p2 : names.p1;
+      document.getElementById('entry-sub').textContent = setterName + ': type a 5-letter word for ' + guesserName + ' to guess';
+      document.getElementById('word-input').value = '';
+      document.getElementById('entry-error').textContent = '';
+      show('partner-entry');
+      setTimeout(() => document.getElementById('word-input').focus(), 100);
+    } else {
+      showPartnerEntry();
+    }
   } else {
     show('home');
   }
