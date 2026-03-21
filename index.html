@@ -82,6 +82,14 @@ body{background:#1a0a14;color:#fff;font-family:'Inter',sans-serif;min-height:100
 .key.present{background:#b59f3b}
 .key.absent{background:#3a3a3c}
 
+/* HEART CONFETTI */
+.heart-particle{position:fixed;pointer-events:none;font-size:1.4rem;animation:heartFly 2.8s ease-out forwards;z-index:999}
+@keyframes heartFly{
+  0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}
+  80%{opacity:1}
+  100%{transform:translateY(-110vh) rotate(360deg) scale(.4);opacity:0}
+}
+
 @media(max-height:680px){
   #board{height:min(320px,45vw)}
   .tile{font-size:1.2rem}
@@ -330,11 +338,12 @@ function submitGuess() {
       gameOver = true;
       const msgs = ['Genius!','Magnificent!','Impressive!','Splendid!','Great!','Phew!'];
       const base = msgs[Math.min(row, 5)];
-      document.getElementById('result-msg').textContent = isPartnerMode ? '&#x1F495; Nice teamwork! ' + base : '&#x1F389; ' + base + ' You got it in ' + (row+1) + '!';
+      document.getElementById('result-msg').innerHTML = isPartnerMode ? '&#x1F495; Nice teamwork! ' + base : '&#x1F389; ' + base + ' You got it in ' + (row+1) + '!';
       document.getElementById('play-again').style.display = 'inline-block';
+      launchHearts();
     } else if (currentRow >= MAX) {
       gameOver = true;
-      document.getElementById('result-msg').textContent = 'The word was:';
+      document.getElementById('result-msg').innerHTML = 'The word was:';
       document.getElementById('result-word').textContent = target.toUpperCase();
       document.getElementById('play-again').style.display = 'inline-block';
     }
@@ -384,6 +393,25 @@ function showToast(msg) {
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>t.classList.remove('show'), 1500);
+}
+
+// ── Heart Confetti ────────────────────────────────────────────
+function launchHearts() {
+  const hearts = ['&#x1F495;','&#x2764;','&#x1F493;','&#x1F497;','&#x1F498;','&#x1F496;'];
+  for (let i = 0; i < 28; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'heart-particle';
+      el.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+      el.style.left = (Math.random() * 100) + 'vw';
+      el.style.bottom = '-40px';
+      el.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+      el.style.animationDelay = '0s';
+      el.style.fontSize = (.9 + Math.random() * 1.4) + 'rem';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }, i * 80);
+  }
 }
 
 // ── Init ──────────────────────────────────────────────────────
