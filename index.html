@@ -275,6 +275,7 @@ let inputLocked = false;
 let hintsLeft = 3;
 let partnerSetterIdx = 0; // 0 = p1 sets, p2 guesses; 1 = p2 sets, p1 guesses
 let shareData = '';
+let pendingPartnerEntry = false;
 
 // ── Screen Navigation ─────────────────────────────────────────
 function show(id) {
@@ -303,13 +304,18 @@ function saveNames(skip) {
   }
   updateNamesDisplay();
   updateHomeTally();
-  show('home');
+  if (pendingPartnerEntry) {
+    pendingPartnerEntry = false;
+    showPartnerEntry();
+  } else {
+    show('home');
+  }
 }
 
 function updateNamesDisplay() {
   const el = document.getElementById('names-display');
   if (names.p1 === 'Player 1' && names.p2 === 'Player 2') {
-    el.innerHTML = '&#x270F;&#xFE0F; Set your names';
+    el.innerHTML = '&#x270F;&#xFE0F; Set names for Partner Mode';
     el.style.color = '#666';
   } else {
     el.innerHTML = '&#x1F495; ' + names.p1 + ' &amp; ' + names.p2 + ' &#x270F;&#xFE0F;';
@@ -351,6 +357,15 @@ function startSolo() {
 }
 
 function showPartnerEntry() {
+  // If names are still defaults, collect them first
+  if (names.p1 === 'Player 1' && names.p2 === 'Player 2') {
+    pendingPartnerEntry = true;
+    document.getElementById('name1-input').value = '';
+    document.getElementById('name2-input').value = '';
+    show('names-screen');
+    return;
+  }
+  pendingPartnerEntry = false;
   const setterName = partnerSetterIdx === 0 ? names.p1 : names.p2;
   const guesserName = partnerSetterIdx === 0 ? names.p2 : names.p1;
   document.getElementById('entry-sub').textContent = setterName + ': type a 5-letter word for ' + guesserName + ' to guess';
@@ -654,14 +669,9 @@ function shareResult() {
 
 // ── Init ──────────────────────────────────────────────────────
 names = loadNames();
-const firstRun = !localStorage.getItem('lovedle_names');
-if (firstRun) {
-  show('names-screen');
-} else {
-  updateNamesDisplay();
-  updateHomeTally();
-  show('home');
-}
+updateNamesDisplay();
+updateHomeTally();
+show('home');
 </script>
 </body>
 </html>
