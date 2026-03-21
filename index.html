@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lovedle &#x1F495; Wordle for Two</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+button,a{touch-action:manipulation}
 body{background:#1a0a14;color:#fff;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-x:hidden}
 
 /* ── SHARED ── */
@@ -540,6 +541,7 @@ function submitGuess() {
       document.getElementById('result-word').textContent = target.toUpperCase();
       document.getElementById('result-actions').style.display = 'flex';
       document.getElementById('hint-btn').disabled = true;
+      launchBrokenHearts();
       if (isPartnerMode) recordPartnerResult(null, false);
     }
   }, 5 * 350 + 200);
@@ -646,18 +648,25 @@ function showToast(msg, ms) {
 }
 
 // ── Heart Confetti ────────────────────────────────────────────
-function launchHearts() {
-  const hearts = ['&#x1F495;','&#x2764;','&#x1F493;','&#x1F497;','&#x1F498;','&#x1F496;'];
-  for(let i=0;i<30;i++){
+function spawnParticles(pool, count) {
+  for(let i=0;i<count;i++){
     setTimeout(() => {
       const el = document.createElement('div');
       el.className = 'heart-particle';
-      el.innerHTML = hearts[Math.floor(Math.random()*hearts.length)];
-      el.style.cssText = `left:${Math.random()*100}vw;bottom:-40px;font-size:${.9+Math.random()*1.4}rem;animation-duration:${2+Math.random()*1.5}s`;
+      el.innerHTML = pool[Math.floor(Math.random()*pool.length)];
+      const sz = (0.9 + Math.random()*1.4).toFixed(2);
+      const dur = (2 + Math.random()*1.5).toFixed(2);
+      el.style.cssText = 'left:'+(Math.random()*100)+'vw;bottom:-40px;font-size:'+sz+'rem;animation-duration:'+dur+'s';
       document.body.appendChild(el);
       el.addEventListener('animationend', () => el.remove());
     }, i*80);
   }
+}
+function launchBrokenHearts() {
+  spawnParticles(['&#x1F494;','&#x1F62D;','&#x1F97A;','&#x1F622;','&#x1F614;','&#x1F494;'], 20);
+}
+function launchHearts() {
+  spawnParticles(['&#x1F495;','&#x2764;','&#x1F493;','&#x1F497;','&#x1F498;','&#x1F496;'], 30);
 }
 
 // ── Share ─────────────────────────────────────────────────────
