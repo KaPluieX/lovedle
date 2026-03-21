@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lovedle 💕</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #121213;
+      --surface: #1a1a1b;
+      --border: #3a3a3c;
+      --text: #ffffff;
+      --text-muted: #818384;
+      --green: #538d4e;
+      --yellow: #b59f3b;
+      --gray: #3a3a3c;
+      --key-default: #818384;
+      --accent: #e05a8a;
+      --accent2: #f4a0c0;
+      --radius: 6px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 1;
+    }
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+      z-index: 10;
+    }
+
+    /* ── HOME ── */
+    #home-screen {
+      background: radial-gradient(ellipse at 50% 30%, #2a1020 0%, #121213 70%);
+      gap: 20px;
+      padding: 40px 20px;
+    }
+    .home-hearts {
+      font-size: 2rem;
+      animation: float 3s ease-in-out infinite;
+      letter-spacing: 8px;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .home-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 10vw, 5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #f4a0c0 0%, #e05a8a 50%, #c0415e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+    .home-subtitle {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      color: var(--accent2);
+      opacity: 0.8;
+      letter-spacing: 1px;
+    }
+    .home-divider {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin: 8px 0;
+    }
+    .home-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 320px;
+      margin-top: 20px;
+    }
+    .btn-home {
+      padding: 18px 28px;
+      border-radius: 50px;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+      letter-spacing: 0.3px;
+    }
+    .btn-home:active { transform: scale(0.96); }
+    .btn-solo {
+      background: linear-gradient(135deg, #2d6a4f, #40916c);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(83, 141, 78, 0.35);
+    }
+    .btn-solo:hover { box-shadow: 0 6px 28px rgba(83, 141, 78, 0.5); transform: translateY(-2px); }
+    .btn-partner {
+      background: linear-gradient(135deg, #b5375a, #e05a8a);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(224, 90, 138, 0.35);
+    }
+    .btn-partner:hover { box-shadow: 0 6px 28px rgba(224, 90, 138, 0.5); transform: translateY(-2px); }
+
+    /* ── PARTNER WORD ENTRY ── */
+    #partner-entry-screen {
+      background: radial-gradient(ellipse at 50% 20%, #2a0f1e 0%, #0d0d0d 70%);
+      padding: 40px 20px;
+      gap: 24px;
+      text-align: center;
+    }
+    .entry-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 6vw, 2.4rem);
+      font-weight: 700;
+      color: var(--accent2);
+    }
+    .entry-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 280px;
+    }
+    .entry-input-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 280px;
+    }
+    .entry-input {
+      width: 100%;
+      padding: 16px 48px 16px 20px;
+      border-radius: 50px;
+      border: 2px solid var(--accent);
+      background: #1e0d17;
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 8px;
+      outline: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .entry-input::placeholder { color: #553344; letter-spacing: 2px; font-size: 0.9rem; }
+    .entry-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(244, 160, 192, 0.15); }
+    .entry-input.error { border-color: #e05a5a; animation: shake 0.4s ease; }
+    .entry-error-msg {
+      font-size: 0.85rem;
+      color: #e05a5a;
+      height: 20px;
+      transition: opacity 0.2s;
+    }
+    .btn-set-word {
+      padding: 16px 36px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, #b5375a, #e05a8a);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(224, 90, 138, 0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-set-word:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(224, 90, 138, 0.5); }
+    .btn-set-word:active { transform: scale(0.96); }
+
+    /* Pass device overlay */
+    #pass-device-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 5, 8, 0.97);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      text-align: center;
+      padding: 40px;
+    }
+    #pass-device-overlay.visible { opacity: 1; pointer-events: all; }
+    .pass-icon { font-size: 4rem; animation: float 2.5s ease-in-out infinite; }
+    .pass-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      color: var(--accent2);
+    }
+    .pass-sub { font-size: 0.9rem; color: var(--text-muted); max-width: 260px; line-height: 1.6; }
+    .btn-ready {
+      padding: 16px 44px;
+      border-radius: 50px;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent2);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+    }
+    .btn-ready:hover { background: var(--accent); color: #fff; transform: scale(1.04); }
+
+    /* ── GAME SCREEN ── */
+    #game-screen {
+      flex-direction: column;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    /* header */
+    .game-header {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #2a2a2c;
+      flex-shrink: 0;
+    }
+    .game-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f4a0c0, #e05a8a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .btn-home-link {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-home-link:hover { border-color: var(--accent); color: var(--accent2); }
+    .mode-badge {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    /* board area */
+    .board-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 10px 6px;
+      overflow: hidden;
+    }
+    .board {
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      gap: 5px;
+      height: 100%;
+      max-height: 360px;
+      aspect-ratio: 5/6;
+    }
+    .board-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+    .tile {
+      width: 100%;
+      aspect-ratio: 1;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text);
+      background: var(--bg);
+      transition: border-color 0.1s;
+      position: relative;
+      transform-style: preserve-3d;
+      user-select: none;
+    }
+    .tile.filled { border-color: #6c6c6e; }
+    .tile.active-row { border-color: #999; }
+    .tile.pop { animation: pop 0.1s ease; }
+
+    /* flip animation */
+    .tile.flip {
+      animation: flip 0.6s ease forwards;
+    }
+    @keyframes flip {
+      0%   { transform: rotateX(0);   background: var(--bg); border-color: #6c6c6e; }
+      49%  { transform: rotateX(90deg); }
+      50%  { transform: rotateX(90deg); background: var(--tile-color, var(--gray)); border-color: var(--tile-color, var(--gray)); }
+      100% { transform: rotateX(0);   background: var(--tile-color, var(--gray)); border-color: var(--tile-color, var(--gray)); }
+    }
+    .tile.revealed {
+      background: var(--tile-color, var(--gray));
+      border-color: var(--tile-color, var(--gray));
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+
+    /* shake */
+    .board-row.shake { animation: shake 0.4s ease; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%  { transform: translateX(-6px); }
+      40%  { transform: translateX(6px); }
+      60%  { transform: translateX(-4px); }
+      80%  { transform: translateX(4px); }
+    }
+
+    /* toast */
+    #toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: #fff;
+      color: #121213;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* result banner */
+    .result-banner {
+      text-align: center;
+      padding: 10px 16px 6px;
+      flex-shrink: 0;
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .result-text {
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      font-weight: 600;
+      color: var(--text);
+      opacity: 0;
+      transition: opacity 0.5s ease 0.8s;
+    }
+    .result-text.visible { opacity: 1; }
+    .btn-play-again {
+      padding: 10px 28px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, #b5375a, #e05a8a);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.5s ease 1s, transform 0.15s;
+      pointer-events: none;
+    }
+    .btn-play-again.visible { opacity: 1; pointer-events: all; }
+    .btn-play-again:hover { transform: scale(1.04); }
+    .btn-play-again:active { transform: scale(0.97); }
+
+    /* keyboard */
+    .keyboard {
+      width: 100%;
+      max-width: 500px;
+      padding: 6px 8px 14px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .key-row {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+    .key {
+      height: 56px;
+      min-width: 36px;
+      flex: 1;
+      max-width: 44px;
+      border-radius: 6px;
+      border: none;
+      background: var(--key-default);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s, transform 0.1s;
+      text-transform: uppercase;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .key:active { transform: scale(0.93); }
+    .key.wide { flex: 1.65; max-width: 68px; font-size: 0.75rem; }
+    .key.green  { background: var(--green); }
+    .key.yellow { background: var(--yellow); }
+    .key.gray   { background: var(--gray); }
+
+    /* mobile tweaks */
+    @media (max-width: 380px) {
+      .key { height: 48px; font-size: 0.78rem; gap: 4px; }
+      .key-row { gap: 4px; }
+      .keyboard { gap: 5px; padding: 4px 6px 10px; }
+    }
+    @media (max-height: 700px) {
+      .board { max-height: 300px; }
+      .key { height: 48px; }
+      .game-header { padding: 10px 16px 8px; }
+    }
+    @media (max-height: 600px) {
+      .board { max-height: 260px; }
+      .key { height: 44px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HOME SCREEN ══════════════ -->
+<div class="screen active" id="home-screen">
+  <div class="home-hearts">💕 💗 💕</div>
+  <h1 class="home-title">Lovedle 💕</h1>
+  <p class="home-subtitle">Wordle for Two</p>
+  <div class="home-divider"></div>
+  <div class="home-btns">
+    <button class="btn-home btn-solo" id="btn-solo">🎮 Solo Play</button>
+    <button class="btn-home btn-partner" id="btn-partner">💕 Partner Mode</button>
+  </div>
+</div>
+
+<!-- ══════════════ PARTNER ENTRY SCREEN ══════════════ -->
+<div class="screen" id="partner-entry-screen">
+  <div class="entry-title">💕 Partner 1</div>
+  <p class="entry-subtitle">Choose a secret 5-letter word for your partner to guess!</p>
+  <div class="entry-input-wrap">
+    <input type="password" class="entry-input" id="entry-input" maxlength="5" placeholder="Type word…" autocomplete="off" autocorrect="off" spellcheck="false" />
+  </div>
+  <div class="entry-error-msg" id="entry-error"></div>
+  <button class="btn-set-word" id="btn-set-word">Set Word 💕</button>
+  <button class="btn-home-link" id="btn-entry-home" style="margin-top:8px">← Home</button>
+</div>
+
+<!-- Pass device overlay -->
+<div id="pass-device-overlay">
+  <div class="pass-icon">📱</div>
+  <p class="pass-title">Pass the device to your partner 💕</p>
+  <p class="pass-sub">Partner 1 has set the word. Now pass it over so Partner 2 can start guessing!</p>
+  <button class="btn-ready" id="btn-ready">Ready! 🎉</button>
+</div>
+
+<!-- ══════════════ GAME SCREEN ══════════════ -->
+<div class="screen" id="game-screen">
+  <div class="game-header">
+    <div>
+      <div class="game-logo">Lovedle 💕</div>
+      <div class="mode-badge" id="mode-badge">Solo</div>
+    </div>
+    <button class="btn-home-link" id="btn-game-home">← Home</button>
+  </div>
+
+  <div class="board-area">
+    <div class="board" id="board"></div>
+  </div>
+
+  <div class="result-banner">
+    <div class="result-text" id="result-text"></div>
+    <button class="btn-play-again" id="btn-play-again">Play Again 💕</button>
+  </div>
+
+  <div class="keyboard" id="keyboard">
+    <div class="key-row" id="row-1"></div>
+    <div class="key-row" id="row-2"></div>
+    <div class="key-row" id="row-3"></div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// WORD LISTS
+// ════════════════════════════════════════════════════════
+const WORDS = [
+  'about','above','abuse','actor','acute','admit','adopt','adult','after','again',
+  'agent','agree','ahead','alarm','album','alert','alike','alive','alley','allow',
+  'alone','along','alter','among','angel','anger','angle','angry','anime','annex',
+  'apart','apple','apply','arena','argue','arise','armor','arose','array','arrow',
+  'aside','asset','atlas','attic','audio','audit','avoid','awake','award','aware',
+  'badly','baker','basic','basis','batch','beach','began','begin','being','below',
+  'bench','bible','birth','black','blade','blame','bland','blank','blast','blaze',
+  'bleed','blend','bless','blind','block','blood','bloom','blown','blues','blunt',
+  'board','boost','booty','bound','boxed','brain','brand','brave','bread','break',
+  'breed','bride','brief','bring','broad','broke','brook','brown','brush','buddy',
+  'build','built','bunch','burst','cabin','camel','candy','carry','catch','cause',
+  'cease','chain','chair','chalk','chaos','charm','chart','chase','cheap','check',
+  'cheek','chess','chest','child','chill','choir','chuck','civic','civil','claim',
+  'clamp','clash','class','clean','clear','click','cliff','climb','cling','clock',
+  'clone','close','cloth','cloud','clown','coach','coast','coral','costs','couch',
+  'could','count','cover','crack','craft','crane','crash','crazy','cream','creek',
+  'crime','crisp','cross','crowd','crown','crumb','crush','curve','cycle','daily',
+  'dance','death','debut','decor','delay','delta','dense','depot','depth','derby',
+  'devil','digit','dirty','disco','ditch','dizzy','dodge','doing','doubt','dough',
+  'draft','drain','drama','drawn','dream','dress','dried','drift','drink','drive',
+  'drone','drove','dryer','dwarf','dying','eager','early','earth','eight','elite',
+  'email','empty','enemy','enjoy','enter','equal','error','event','every','exact',
+  'exist','extra','fable','faced','faith','false','fancy','fatal','fault','feast',
+  'fence','ferry','fetch','fewer','fiber','field','fifth','fifty','fight','final',
+  'first','fixed','flame','flare','flash','flask','fleet','flesh','flick','float',
+  'flood','floor','flora','flour','fluid','flush','focus','force','forge','forth',
+  'found','frame','frank','fraud','fresh','front','frost','froze','fruit','fully',
+  'funny','gains','giant','giver','given','glade','glass','glaze','gleam','glide',
+  'gloom','gloss','glove','glyph','grace','grade','grand','grant','graph','grasp',
+  'grass','grave','great','greet','grief','grind','groan','groom','grove','grown',
+  'guard','guess','guest','guide','guild','guilt','gusto','happy','harsh','haste',
+  'haunt','haven','heads','heart','heavy','hedge','heist','hello','hence','herbs',
+  'hinge','hobby','holly','honor','horse','hotel','house','human','humid','hurry',
+  'hyper','ideal','image','imply','index','indie','infer','inner','input','inter',
+  'intro','issue','ivory','japan','jewel','joint','joker','joust','judge','juice',
+  'juicy','jumbo','karma','kayak','kiosk','knack','kneel','knife','knock','known',
+  'label','lapse','large','laser','later','laugh','layer','learn','lease','least',
+  'ledge','legal','lemon','level','light','limit','linen','liner','local','lodge',
+  'logic','loose','lover','lower','lucky','lunar','lunch','lusty','lying','magic',
+  'major','maker','manor','maple','march','marsh','match','mayor','media','mercy',
+  'merge','merit','metal','might','minor','minus','mixed','model','money','month',
+  'moral','motor','mourn','mouse','mouth','moved','movie','music','nanny','naval',
+  'nerve','never','night','ninja','noble','noise','north','noted','novel','nurse',
+  'nymph','occur','ocean','offer','often','olive','optic','order','other','ought',
+  'outer','outwit','oxide','ozone','paint','panel','paper','party','pasta','patch',
+  'pause','peace','peach','pearl','penny','perky','perch','phase','phone','photo',
+  'piano','piece','pilot','pitch','pixel','pizza','place','plain','plane','plant',
+  'plaza','plead','plumb','plume','plunge','plunk','point','polar','polka','poppy',
+  'porch','power','press','price','pride','prime','print','prior','prize','probe',
+  'prone','proof','prose','proud','prove','prowl','proxy','pulse','punch','pupil',
+  'puree','purse','queen','query','quest','queue','quick','quiet','quite','quota',
+  'quote','rabbi','radar','radio','raise','rally','ranch','range','rapid','ratio',
+  'reach','react','realm','rebel','refer','reflex','reign','relax','remix','renal',
+  'repay','repel','reply','rider','ridge','right','rigid','risky','rival','robot',
+  'rocky','roman','rouge','rough','round','route','ruler','rural','saint','salad',
+  'sauce','scale','scene','scope','score','scout','seize','sense','serve','setup',
+  'seven','shade','shall','shame','shape','share','shark','sharp','shelf','shell',
+  'shift','shine','shirt','shock','shore','short','shout','shrug','sight','silly',
+  'since','sixth','sixty','skate','skill','slate','sleep','slice','slide','slope',
+  'sloth','small','smart','smell','smile','smoke','sneak','solar','solve','sound',
+  'south','space','spare','spark','spawn','speak','spell','spend','spice','spike',
+  'spine','spite','split','spoke','sport','spray','spree','squad','stack','staff',
+  'stage','stain','stair','stake','stale','stall','stamp','stand','stark','start',
+  'state','stays','steam','steel','steep','steer','stern','stick','stiff','still',
+  'stock','stomp','stood','store','storm','story','stout','stove','strap','straw',
+  'stray','strip','stuck','study','style','sugar','suite','super','surge','swamp',
+  'swear','sweat','sweep','sweet','swept','swift','swirl','sword','sworn','syrup',
+  'table','taken','taste','teach','tense','teeth','thank','their','theme','there',
+  'these','thick','thing','think','third','thorn','those','three','threw','throw',
+  'thumb','tiger','tilde','timer','tired','title','today','token','total','touch',
+  'tough','towel','tower','toxic','track','trade','trail','train','trait','tramp',
+  'trash','treat','trend','trial','tribe','trick','tried','troop','truck','truly',
+  'trunk','trust','truth','tumor','turbo','tweak','twice','twist','tying','ultra',
+  'under','unify','union','unite','until','upper','upset','urban','usage','usher',
+  'usual','utter','valid','value','verse','video','viola','viral','virus','visit',
+  'vista','vital','vivid','voice','voter','vowel','waist','waste','watch','water',
+  'weary','weave','weigh','weird','wheat','wheel','where','which','while','white',
+  'whole','whose','wider','width','windy','witch','woman','women','world','worry',
+  'worse','worst','worth','would','wound','wrath','write','wrote','yacht','yield',
+  'young','youth','zebra','zesty','zilch','zippy','zones'
+].filter(w => w.length === 5);
+
+// Deduplicate
+const uniqueWords = [...new Set(WORDS)];
+const VALID_GUESSES = new Set(uniqueWords);
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let targetWord = '';
+let currentMode = 'solo'; // 'solo' | 'partner'
+let guesses = [];         // array of submitted guess strings
+let currentGuess = '';
+let gameOver = false;
+let isAnimating = false;
+
+// ════════════════════════════════════════════════════════
+// SCREEN NAV
+// ════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════
+// BOARD INIT
+// ════════════════════════════════════════════════════════
+function buildBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  for (let r = 0; r < 6; r++) {
+    const row = document.createElement('div');
+    row.className = 'board-row';
+    row.id = `row-${r}`;
+    for (let c = 0; c < 5; c++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.id = `tile-${r}-${c}`;
+      row.appendChild(tile);
+    }
+    board.appendChild(row);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// KEYBOARD BUILD
+// ════════════════════════════════════════════════════════
+const KB_ROWS = [
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L'],
+  ['ENTER','Z','X','C','V','B','N','M','⌫']
+];
+function buildKeyboard() {
+  KB_ROWS.forEach((keys, i) => {
+    const row = document.getElementById(`row-${i+1}`);
+    row.innerHTML = '';
+    keys.forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'key' + (k === 'ENTER' || k === '⌫' ? ' wide' : '');
+      btn.textContent = k;
+      btn.dataset.key = k;
+      btn.addEventListener('click', () => handleKey(k));
+      row.appendChild(btn);
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// KEY HANDLER
+// ════════════════════════════════════════════════════════
+function handleKey(key) {
+  if (gameOver || isAnimating) return;
+  if (key === 'ENTER') { submitGuess(); return; }
+  if (key === '⌫' || key === 'Backspace') { deleteLetter(); return; }
+  if (/^[A-Za-z]$/.test(key)) addLetter(key.toUpperCase());
+}
+
+function addLetter(letter) {
+  if (currentGuess.length >= 5) return;
+  currentGuess += letter;
+  const row = guesses.length;
+  const col = currentGuess.length - 1;
+  const tile = document.getElementById(`tile-${row}-${col}`);
+  tile.textContent = letter;
+  tile.classList.add('filled', 'active-row', 'pop');
+  tile.addEventListener('animationend', () => tile.classList.remove('pop'), { once: true });
+}
+
+function deleteLetter() {
+  if (currentGuess.length === 0) return;
+  const row = guesses.length;
+  const col = currentGuess.length - 1;
+  const tile = document.getElementById(`tile-${row}-${col}`);
+  tile.textContent = '';
+  tile.classList.remove('filled', 'active-row');
+  currentGuess = currentGuess.slice(0, -1);
+}
+
+// ════════════════════════════════════════════════════════
+// SUBMIT
+// ════════════════════════════════════════════════════════
+function submitGuess() {
+  if (currentGuess.length < 5) { showToast('Not enough letters'); shakeRow(guesses.length); return; }
+  if (!VALID_GUESSES.has(currentGuess.toLowerCase())) {
+    showToast('Not a word!');
+    shakeRow(guesses.length);
+    return;
+  }
+
+  const guess = currentGuess;
+  const rowIdx = guesses.length;
+  guesses.push(guess);
+  currentGuess = '';
+
+  // Remove active-row highlight from tiles
+  for (let c = 0; c < 5; c++) {
+    document.getElementById(`tile-${rowIdx}-${c}`).classList.remove('active-row');
+  }
+
+  const result = evaluateGuess(guess);
+  isAnimating = true;
+  revealRow(rowIdx, guess, result, () => {
+    updateKeyboard(guess, result);
+    isAnimating = false;
+    if (result.every(r => r === 'correct')) {
+      gameOver = true;
+      const msg = currentMode === 'partner'
+        ? `🎉 Got it in ${guesses.length}! 💕 Nice teamwork!`
+        : `🎉 You got it in ${guesses.length} guess${guesses.length === 1 ? '' : 'es'}!`;
+      showResult(msg);
+    } else if (guesses.length === 6) {
+      gameOver = true;
+      showResult(`The word was: ${targetWord}`);
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// EVALUATE
+// ════════════════════════════════════════════════════════
+function evaluateGuess(guess) {
+  const result = Array(5).fill('absent');
+  const target = targetWord.toLowerCase().split('');
+  const guessArr = guess.toLowerCase().split('');
+  const targetCopy = [...target];
+
+  // First pass: correct
+  for (let i = 0; i < 5; i++) {
+    if (guessArr[i] === targetCopy[i]) {
+      result[i] = 'correct';
+      targetCopy[i] = null;
+      guessArr[i] = null;
+    }
+  }
+  // Second pass: present
+  for (let i = 0; i < 5; i++) {
+    if (guessArr[i] === null) continue;
+    const idx = targetCopy.indexOf(guessArr[i]);
+    if (idx !== -1) {
+      result[i] = 'present';
+      targetCopy[idx] = null;
+    }
+  }
+  return result;
+}
+
+// ════════════════════════════════════════════════════════
+// REVEAL ANIMATION
+// ════════════════════════════════════════════════════════
+const COLOR_MAP = { correct: 'var(--green)', present: 'var(--yellow)', absent: 'var(--gray)' };
+
+function revealRow(rowIdx, guess, result, callback) {
+  for (let c = 0; c < 5; c++) {
+    const tile = document.getElementById(`tile-${rowIdx}-${c}`);
+    const color = COLOR_MAP[result[c]];
+    tile.style.setProperty('--tile-color', color);
+    tile.style.animationDelay = `${c * 120}ms`;
+    tile.classList.add('flip');
+    tile.addEventListener('animationend', () => {
+      tile.classList.remove('flip');
+      tile.classList.add('revealed');
+    }, { once: true });
+  }
+  setTimeout(callback, 5 * 120 + 600);
+}
+
+// ════════════════════════════════════════════════════════
+// KEYBOARD UPDATE
+// ════════════════════════════════════════════════════════
+const KEY_PRIORITY = { correct: 3, present: 2, absent: 1 };
+const keyStates = {};
+
+function updateKeyboard(guess, result) {
+  for (let i = 0; i < 5; i++) {
+    const letter = guess[i].toUpperCase();
+    const state = result[i];
+    if (!keyStates[letter] || KEY_PRIORITY[state] > KEY_PRIORITY[keyStates[letter]]) {
+      keyStates[letter] = state;
+    }
+    const btn = document.querySelector(`.key[data-key="${letter}"]`);
+    if (btn) {
+      btn.classList.remove('green', 'yellow', 'gray');
+      if (keyStates[letter] === 'correct') btn.classList.add('green');
+      else if (keyStates[letter] === 'present') btn.classList.add('yellow');
+      else btn.classList.add('gray');
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function shakeRow(rowIdx) {
+  const row = document.getElementById(`row-${rowIdx}`);
+  row.classList.add('shake');
+  row.addEventListener('animationend', () => row.classList.remove('shake'), { once: true });
+}
+
+function showResult(msg) {
+  const el = document.getElementById('result-text');
+  const btn = document.getElementById('btn-play-again');
+  el.textContent = msg;
+  setTimeout(() => { el.classList.add('visible'); btn.classList.add('visible'); }, 400);
+}
+
+function clearResult() {
+  const el = document.getElementById('result-text');
+  const btn = document.getElementById('btn-play-again');
+  el.textContent = '';
+  el.classList.remove('visible');
+  btn.classList.remove('visible');
+}
+
+// ════════════════════════════════════════════════════════
+// START GAME
+// ════════════════════════════════════════════════════════
+function startGame(mode, word) {
+  currentMode = mode;
+  targetWord = word.toUpperCase();
+  guesses = [];
+  currentGuess = '';
+  gameOver = false;
+  isAnimating = false;
+  Object.keys(keyStates).forEach(k => delete keyStates[k]);
+
+  // Reset keyboard colors
+  document.querySelectorAll('.key').forEach(k => k.classList.remove('green','yellow','gray'));
+
+  document.getElementById('mode-badge').textContent = mode === 'solo' ? '🎮 Solo' : '💕 Partner';
+  clearResult();
+  buildBoard();
+  showScreen('game-screen');
+}
+
+function randomWord() {
+  return uniqueWords[Math.floor(Math.random() * uniqueWords.length)].toUpperCase();
+}
+
+// ════════════════════════════════════════════════════════
+// PARTNER ENTRY
+// ════════════════════════════════════════════════════════
+function showPartnerEntry() {
+  document.getElementById('entry-input').value = '';
+  document.getElementById('entry-error').textContent = '';
+  showScreen('partner-entry-screen');
+  setTimeout(() => document.getElementById('entry-input').focus(), 400);
+}
+
+document.getElementById('btn-set-word').addEventListener('click', () => {
+  const val = document.getElementById('entry-input').value.trim().toLowerCase();
+  const errEl = document.getElementById('entry-error');
+  if (val.length !== 5) {
+    errEl.textContent = 'Word must be exactly 5 letters!';
+    document.getElementById('entry-input').classList.add('error');
+    setTimeout(() => document.getElementById('entry-input').classList.remove('error'), 600);
+    return;
+  }
+  errEl.textContent = '';
+  // Show pass device overlay
+  document.getElementById('pass-device-overlay').classList.add('visible');
+  // Store word for later
+  window._partnerWord = val;
+});
+
+document.getElementById('btn-ready').addEventListener('click', () => {
+  document.getElementById('pass-device-overlay').classList.remove('visible');
+  startGame('partner', window._partnerWord);
+});
+
+// Entry input: only allow letters
+document.getElementById('entry-input').addEventListener('input', function() {
+  this.value = this.value.replace(/[^a-zA-Z]/g, '').slice(0, 5);
+});
+document.getElementById('entry-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('btn-set-word').click();
+});
+
+// ════════════════════════════════════════════════════════
+// NAV BUTTONS
+// ════════════════════════════════════════════════════════
+document.getElementById('btn-solo').addEventListener('click', () => {
+  startGame('solo', randomWord());
+});
+document.getElementById('btn-partner').addEventListener('click', showPartnerEntry);
+document.getElementById('btn-entry-home').addEventListener('click', () => showScreen('home-screen'));
+document.getElementById('btn-game-home').addEventListener('click', () => showScreen('home-screen'));
+document.getElementById('btn-play-again').addEventListener('click', () => {
+  if (currentMode === 'solo') {
+    startGame('solo', randomWord());
+  } else {
+    showPartnerEntry();
+  }
+});
+
+// ════════════════════════════════════════════════════════
+// PHYSICAL KEYBOARD
+// ════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (document.getElementById('partner-entry-screen').classList.contains('active')) return;
+  if (document.getElementById('home-screen').classList.contains('active')) return;
+  if (document.getElementById('pass-device-overlay').classList.contains('visible')) return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  handleKey(e.key === 'Backspace' ? '⌫' : e.key);
+});
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+buildKeyboard();
+buildBoard();
+</script>
+</body>
+</html>
