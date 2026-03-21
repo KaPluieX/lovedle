@@ -330,7 +330,7 @@ function updateHomeTally() {
     const div = document.createElement('div');
     div.className = 'tally-row';
     const avg = s.rounds > 0 ? (s.totalGuesses / s.rounds).toFixed(1) : '-';
-    div.innerHTML = `<span class="tally-name">${name}</span><span class="tally-stats">${s.rounds} rounds &bull; avg ${avg}</span><span class="tally-wins">${s.wins}W</span>`;
+    const esc=t=>t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); div.innerHTML = `<span class="tally-name">${esc(name)}</span><span class="tally-stats">${s.rounds} rounds &bull; avg ${avg}</span><span class="tally-wins">${s.wins}W</span>`;
     rows.appendChild(div);
   });
 }
@@ -489,7 +489,7 @@ function updateCurrentRow() {
 function submitGuess() {
   if (currentInput.length < 5) { showToast('Not enough letters'); shakeRow(currentRow); return; }
   const w = currentInput.toLowerCase();
-  if (!WORDS.includes(w) && !VALID_GUESSES.includes(w)) { showToast('Not a word!'); shakeRow(currentRow); return; }
+  if (!VALID_GUESSES.includes(w)) { showToast('Not a word!'); shakeRow(currentRow); return; }
   const feedback = computeFeedback(w, target);
   guesses.push({word:w, feedback});
   flipRow(currentRow, feedback);
@@ -499,7 +499,7 @@ function submitGuess() {
   inputLocked = true;
   setTimeout(() => { inputLocked = false; }, 400);
 
-  const emojiMap = {correct:'&#x1F7E9;',present:'&#x1F7E8;',absent:'&#x2B1B;'};
+  const emojiMap = {correct:String.fromCodePoint(0x1F7E9),present:String.fromCodePoint(0x1F7E8),absent:String.fromCodePoint(0x2B1B)};
   shareData += feedback.map(f => emojiMap[f.result]).join('') + '\n';
 
   const won = feedback.every(f => f.result === 'correct');
@@ -558,9 +558,7 @@ function useHint() {
 // ── Partner Scoring ───────────────────────────────────────────
 function recordPartnerResult(guessCount, won) {
   const guesserKey = partnerSetterIdx === 0 ? 'p2' : 'p1';
-  const setterKey = partnerSetterIdx === 0 ? 'p1' : 'p2';
   const guesserName = partnerSetterIdx === 0 ? names.p2 : names.p1;
-  const setterName = partnerSetterIdx === 0 ? names.p1 : names.p2;
   const scores = loadScores();
   if (!scores[guesserKey]) scores[guesserKey] = {wins:0,rounds:0,totalGuesses:0};
   scores[guesserKey].rounds++;
@@ -580,7 +578,7 @@ function showRoundResult(guesserName, setterName, guessCount, won, scores) {
   [[p1k, names.p1, p1Data],[p2k, names.p2, p2Data]].forEach(([key, name, s]) => {
     if (!s) return;
     const div = document.createElement('div');
-    const isWinner = s.wins === Math.max((scores[p1k]||{wins:0}).wins, (scores[p2k]||{wins:0}).wins) && s.wins > 0;
+    const maxWins = Math.max((scores[p1k]||{wins:0}).wins, (scores[p2k]||{wins:0}).wins); const isTie = (scores[p1k]||{wins:0}).wins === (scores[p2k]||{wins:0}).wins && maxWins > 0; const isWinner = !isTie && s.wins === maxWins && s.wins > 0;
     div.className = 'rr-player' + (isWinner ? ' winner' : '');
     const avg = s.rounds > 0 ? (s.totalGuesses / s.rounds).toFixed(1) : '-';
     div.innerHTML = `<div class="rr-player-name">${name}</div><div class="rr-player-guesses">${s.wins}</div><div class="rr-player-label">${s.rounds} rounds &bull; avg ${avg}</div>`;
@@ -608,7 +606,7 @@ function flipRow(row, feedback) {
       tile.style.transform = 'rotateX(-90deg)';
       setTimeout(() => {
         tile.classList.add(result);
-        tile.style.transform = 'rotateX(0deg)';
+        tile.style.transform = ''; tile.style.transition = '';
       }, 250);
     }, c * 350);
   }
