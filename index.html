@@ -159,6 +159,7 @@ let currentInput = '';
 let gameOver = false;
 let isPartnerMode = false;
 let partnerWord = '';
+let inputLocked = false;
 const MAX = 6;
 
 // ── Navigation ───────────────────────────────────────────────
@@ -247,7 +248,7 @@ function buildKeyboard() {
       btn.className = 'key' + (k === 'ENTER' || k === '&#x232B;' ? ' wide' : '');
       btn.innerHTML = k;
       btn.dataset.key = k;
-      btn.addEventListener('click', () => handleKey(k === '&#x232B;' ? 'BACKSPACE' : k));
+      btn.addEventListener('click', () => { btn.blur(); handleKey(k === '&#x232B;' ? 'BACKSPACE' : k); });
       el.appendChild(btn);
     });
   });
@@ -273,6 +274,8 @@ function updateKeyColors(feedback, guess) {
 document.addEventListener('keydown', e => {
   if (document.getElementById('game').style.display === 'none') return;
   if (e.ctrlKey || e.altKey || e.metaKey) return;
+  // Prevent button re-activation via keyboard when a key button has focus
+  if (e.target && e.target.classList && e.target.classList.contains('key')) { e.preventDefault(); return; }
   if (e.key === 'Enter') handleKey('ENTER');
   else if (e.key === 'Backspace') handleKey('BACKSPACE');
   else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
@@ -280,6 +283,7 @@ document.addEventListener('keydown', e => {
 
 function handleKey(key) {
   if (gameOver) return;
+  if (inputLocked) return;
   if (key === 'BACKSPACE') {
     if (currentInput.length > 0) {
       currentInput = currentInput.slice(0,-1);
@@ -317,6 +321,8 @@ function submitGuess() {
   const row = currentRow;
   currentRow++;
   currentInput = '';
+  inputLocked = true;
+  setTimeout(() => { inputLocked = false; }, 400);
 
   setTimeout(() => {
     updateKeyColors(feedback, w);
