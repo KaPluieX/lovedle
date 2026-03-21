@@ -547,6 +547,7 @@ function submitGuess() {
       document.getElementById('result-actions').style.display = 'flex';
       document.getElementById('hint-btn').disabled = true;
       launchHearts();
+      logGame(true, row+1);
       if (isPartnerMode) recordPartnerResult(row+1, true);
     } else if (currentRow >= 6) {
       gameOver = true;
@@ -555,6 +556,7 @@ function submitGuess() {
       document.getElementById('result-actions').style.display = 'flex';
       document.getElementById('hint-btn').disabled = true;
       launchBrokenHearts();
+      logGame(false, 7);
       if (isPartnerMode) recordPartnerResult(null, false);
     }
   }, 5 * 350 + 200);
@@ -691,6 +693,27 @@ function launchHearts() {
 }
 
 // ── Share ─────────────────────────────────────────────────────
+// -- Game Logger ──────────────────────────────────────────────
+const LOG_URL = 'https://lovedle-logs.kapluie-workers.workers.dev/log';
+async function logGame(won, guessCount) {
+  try {
+    await fetch(LOG_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode: isPartnerMode ? 'partner' : 'solo',
+        word: target,
+        won,
+        guesses: guessCount,
+        player1: names.p1 !== 'Player 1' ? names.p1 : null,
+        player2: names.p2 !== 'Player 2' ? names.p2 : null,
+        guesser: isPartnerMode ? (partnerSetterIdx === 0 ? names.p2 : names.p1) : null,
+      }),
+      keepalive: true
+    });
+  } catch(e) { /* silently fail */ }
+}
+
 function shareResult() {
   const guessCount = gameOver && guesses[guesses.length-1].feedback.every(f=>f.result==='correct') ? guesses.length : 'X';
   const text = 'Lovedle \u2665 ' + guessCount + '/6\n\n' + shareData;
