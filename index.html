@@ -134,6 +134,28 @@ body{background:#1a0a14;color:#fff;font-family:'Inter',sans-serif;min-height:100
 @keyframes heartFallSad{0%{transform:translateY(0) rotate(-8deg) scale(1);opacity:1}25%{transform:translateY(-25vh) rotate(8deg) scale(.95)}50%{transform:translateY(-50vh) rotate(-6deg) scale(.9)}75%{transform:translateY(-75vh) rotate(4deg);opacity:.8}100%{transform:translateY(-110vh) rotate(-8deg) scale(.5);opacity:0}}
 .heart-particle.sad{animation-name:heartFallSad;animation-timing-function:ease-in-out}
 
+
+/* -- ONLINE MODE -- */
+#online-menu .om-title{font-size:1.8rem;margin-bottom:8px}
+.om-divider{color:#555;margin:16px 0;font-size:.85rem;letter-spacing:2px}
+.code-display{font-family:monospace;font-size:3rem;font-weight:700;letter-spacing:14px;color:#f9a8d4;background:#2d1a26;border-radius:14px;padding:16px 28px;margin:16px 0;text-align:center;min-width:240px}
+.code-input{background:#2d1a26;border:2px solid #4a2040;border-radius:10px;color:#fff;font-size:1.8rem;letter-spacing:10px;text-align:center;padding:12px 16px;width:220px;outline:none;font-family:monospace;text-transform:uppercase}
+.code-input:focus{border-color:#ec4899;box-shadow:0 0 0 3px rgba(236,72,153,.2)}
+.wait-sub{color:#aaa;font-size:.9rem;margin-bottom:28px}
+.spinner{width:32px;height:32px;border:3px solid #4a2040;border-top-color:#ec4899;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* opponent mini board */
+#opponent-panel{background:#2d1a26;border:1px solid #3d1a30;border-radius:12px;padding:10px 14px;margin:0 auto 8px;width:min(330px,90vw);display:none}
+.opp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.opp-name-label{font-size:.8rem;color:#f9a8d4;font-weight:600}
+.opp-status-label{font-size:.75rem;color:#aaa}
+.opp-mini-board{display:grid;grid-template-rows:repeat(6,1fr);gap:3px}
+.opp-row{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.opp-tile{width:100%;aspect-ratio:1;border-radius:2px;background:#121213;border:1px solid #3a3a3c}
+.opp-tile.correct{background:#538d4e;border-color:#538d4e}
+.opp-tile.present{background:#b59f3b;border-color:#b59f3b}
+.opp-tile.absent{background:#3a3a3c;border-color:#3a3a3c}
 @media(max-height:680px){
   #board{height:min(320px,45vw)}
   .tile{font-size:1.2rem}
@@ -170,6 +192,7 @@ body{background:#1a0a14;color:#fff;font-family:'Inter',sans-serif;min-height:100
   <div class="divider"></div>
   <button class="mode-btn btn-solo" onclick="startSolo()">&#x1F3AE; Solo Play</button>
   <button class="mode-btn btn-partner" onclick="showPartnerEntry()">&#x1F495; Partner Mode</button>
+  <button class="mode-btn" style="background:linear-gradient(135deg,#1d4ed8,#6366f1)" onclick="showOnlineMenu()">&#x1F310; Play Online</button>
   <div id="home-tally" style="display:none" class="tally-bar">
     <h4>&#x1F3C6; Partner Scores</h4>
     <div id="tally-rows"></div>
@@ -186,7 +209,34 @@ body{background:#1a0a14;color:#fff;font-family:'Inter',sans-serif;min-height:100
   <button class="back-btn" onclick="goHome()" style="margin-top:20px;padding:8px 18px">&#x2190; Back</button>
 </div>
 
-<!-- PASS SCREEN -->
+
+<!-- ONLINE MENU -->
+<div id="online-menu" class="screen">
+  <div class="pink-title om-title">&#x1F310; Play Online</div>
+  <p class="sub-text" style="margin-bottom:24px">Same word, separate devices, may the best guesser win &#x1F495;</p>
+  <div class="name-group" style="margin-bottom:0">
+    <div>
+      <div class="name-label">YOUR NAME</div>
+      <input type="text" id="online-name-input" class="name-input" maxlength="16" placeholder="Your name" autocomplete="off">
+    </div>
+  </div>
+  <button class="btn-pink" style="margin-top:20px" onclick="createOnlineRoom()">&#x2728; Create Room</button>
+  <div class="om-divider">&#x2015; OR JOIN &#x2015;</div>
+  <input type="text" id="join-code-input" class="code-input" maxlength="5" placeholder="CODE" autocomplete="off" spellcheck="false" oninput="this.value=this.value.replace(/[^A-Za-z]/g,'').toUpperCase().substring(0,5)">
+  <button class="btn-green" style="margin-top:12px" onclick="joinOnlineRoom()">&#x1F517; Join Room</button>
+  <div class="entry-error" id="online-error"></div>
+  <button class="back-btn" onclick="goHome()" style="margin-top:20px;padding:8px 18px">&#x2190; Back</button>
+</div>
+
+<!-- ONLINE WAITING (creator waits for joiner) -->
+<div id="online-wait" class="screen">
+  <div class="pink-title" style="font-size:1.6rem;margin-bottom:8px">Waiting for your partner&#x2026;</div>
+  <p class="wait-sub">Share this code with them:</p>
+  <div class="code-display" id="wait-code">-----</div>
+  <div class="spinner"></div>
+  <p class="wait-sub">Once they join, the game starts automatically &#x1F495;</p>
+  <button class="back-btn" onclick="cancelOnlineRoom()" style="padding:8px 18px;margin-top:8px">Cancel</button>
+</div><!-- PASS SCREEN -->
 <div id="pass-screen" class="screen">
   <div class="pass-heart">&#x1F495;</div>
   <div class="pink-title pass-title" id="pass-title">Pass to your partner!</div>
@@ -201,6 +251,13 @@ body{background:#1a0a14;color:#fff;font-family:'Inter',sans-serif;min-height:100
     <button class="back-btn" onclick="confirmHome()">&#x2190; Home</button>
   </div>
   <div id="board"></div>
+  <div id="opponent-panel">
+    <div class="opp-header">
+      <div class="opp-name-label" id="opp-name-label">Opponent</div>
+      <div class="opp-status-label" id="opp-status-label">Waiting&#x2026;</div>
+    </div>
+    <div class="opp-mini-board" id="opp-mini-board"></div>
+  </div>
   <div class="hint-row">
     <button class="hint-btn" id="hint-btn" onclick="useHint()">
       &#x1F4A1; Hint <span class="hint-count" id="hint-count">3</span>
@@ -288,6 +345,11 @@ function show(id) {
 }
 
 function goHome() {
+  stopPoll();
+  onlineMode = false;
+  onlineRoomCode = '';
+  onlinePlayerSlot = 0;
+  document.getElementById('session-tally').style.display = 'block';
   updateHomeTally();
   show('home');
 }
@@ -430,6 +492,9 @@ function initGame() {
   inputLocked = false;
   hintsLeft = 3;
   shareData = '';
+  // Reset online panel
+  const oppPanel = document.getElementById('opponent-panel');
+  if (oppPanel) oppPanel.style.display = 'none';
   document.getElementById('hint-btn').disabled = false;
   document.getElementById('hint-count').textContent = '3';
   document.getElementById('result-msg').innerHTML = '';
@@ -515,11 +580,33 @@ function updateCurrentRow() {
 }
 
 // ── Submit ────────────────────────────────────────────────────
-function submitGuess() {
+async function submitGuess() {
   if (currentInput.length < 5) { showToast('Not enough letters'); shakeRow(currentRow); return; }
   const w = currentInput.toLowerCase();
   if (!VALID_GUESSES.includes(w)) { showToast('Not a word!'); shakeRow(currentRow); return; }
-  const feedback = computeFeedback(w, target);
+
+  let feedback;
+  if (onlineMode) {
+    inputLocked = true;
+    try {
+      const r = await fetch(WORKER + '/room/' + onlineRoomCode + '/guess', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ slot: onlinePlayerSlot, guess: w })
+      });
+      const data = await r.json();
+      if (data.error) { showToast(data.error); inputLocked = false; return; }
+      feedback = data.feedback.map((result, i) => ({ letter: w[i], result }));
+      if (data.word) target = data.word; // reveal word when game done
+    } catch(e) {
+      showToast('Connection error, try again');
+      inputLocked = false;
+      return;
+    }
+    inputLocked = false;
+  } else {
+    feedback = computeFeedback(w, target);
+  }
   guesses.push({word:w, feedback});
   flipRow(currentRow, feedback);
   const row = currentRow;
@@ -693,6 +780,208 @@ function launchHearts() {
 }
 
 // ── Share ─────────────────────────────────────────────────────
+// -- Online Multiplayer ───────────────────────────────────────
+const WORKER = 'https://lovedle-logs.kapluie-workers.workers.dev';
+let onlineMode = false;
+let onlineRoomCode = '';
+let onlinePlayerSlot = 0;
+let onlinePollTimer = null;
+let onlineOpponentDone = false;
+
+function showOnlineMenu() {
+  document.getElementById('online-name-input').value = names.p1 !== 'Player 1' ? names.p1 : '';
+  document.getElementById('online-error').textContent = '';
+  document.getElementById('join-code-input').value = '';
+  show('online-menu');
+}
+
+async function createOnlineRoom() {
+  const name = document.getElementById('online-name-input').value.trim() || 'Player 1';
+  document.getElementById('online-error').textContent = '';
+  try {
+    const r = await fetch(WORKER + '/room', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name })
+    });
+    const data = await r.json();
+    if (!data.code) throw new Error('No code returned');
+    onlineRoomCode = data.code;
+    onlinePlayerSlot = 1;
+    sessionStorage.setItem('online_word_' + data.code, data.word);
+    document.getElementById('wait-code').textContent = data.code;
+    show('online-wait');
+    startWaitingPoll();
+  } catch(e) {
+    document.getElementById('online-error').textContent = 'Could not create room. Check connection.';
+  }
+}
+
+async function joinOnlineRoom() {
+  const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+  const name = document.getElementById('online-name-input').value.trim() || 'Player 2';
+  if (code.length < 4) { document.getElementById('online-error').textContent = 'Enter the 5-letter room code.'; return; }
+  document.getElementById('online-error').textContent = '';
+  try {
+    const r = await fetch(WORKER + '/room/' + code + '/join', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name })
+    });
+    const data = await r.json();
+    if (data.error) { document.getElementById('online-error').textContent = data.error; return; }
+    onlineRoomCode = code;
+    onlinePlayerSlot = 2;
+    onlineMode = true;
+    target = data.word; // p2 gets word from server on join
+    initGame();
+    initOpponentPanel(name, 'Player 1'); // p2 sees p1 as opponent
+    startPollOpponent();
+    show('game');
+  } catch(e) {
+    document.getElementById('online-error').textContent = 'Room not found. Check the code.';
+  }
+}
+
+function cancelOnlineRoom() {
+  stopPoll();
+  onlineRoomCode = '';
+  show('online-menu');
+}
+
+function startWaitingPoll() {
+  stopPoll();
+  onlinePollTimer = setInterval(async () => {
+    try {
+      const r = await fetch(WORKER + '/room/' + onlineRoomCode);
+      const data = await r.json();
+      if (data.status === 'playing' || data.status === 'done') {
+        stopPoll();
+        // P1 knows the word (created the room) — fetch it from state or compute
+        // Actually P1 needs to get the word — room creator doesn't know it yet
+        // Fetch room to get word via join slot trick: re-read room state
+        // P1 gets word by reading room now that it's playing
+        const r2 = await fetch(WORKER + '/room/' + onlineRoomCode);
+        const d2 = await r2.json();
+        // Word only exposed when done, so we need another approach for P1
+        // Solution: P1 reads word from a special param we'll add
+        // Actually, let's fetch with slot param
+        await startOnlineGameAsP1(data);
+      }
+    } catch(e) {}
+  }, 2000);
+}
+
+async function startOnlineGameAsP1(roomData) {
+  // P1 needs the word — get it via a create-confirmed endpoint
+  // Workaround: store word in sessionStorage at room creation time
+  const word = sessionStorage.getItem('online_word_' + onlineRoomCode);
+  if (!word) { show('online-menu'); return; }
+  onlineMode = true;
+  target = word;
+  const p2name = roomData.players['2'] ? roomData.players['2'].name : 'Player 2';
+  const p1name = roomData.players['1'] ? roomData.players['1'].name : 'Player 1';
+  initGame();
+  initOpponentPanel(p1name, p2name);
+  startPollOpponent();
+  show('game');
+}
+
+function stopPoll() {
+  if (onlinePollTimer) { clearInterval(onlinePollTimer); onlinePollTimer = null; }
+}
+
+function initOpponentPanel(myName, oppName) {
+  onlineOpponentDone = false;
+  const panel = document.getElementById('opponent-panel');
+  panel.style.display = 'block';
+  document.getElementById('opp-name-label').textContent = oppName + ' (opponent)';
+  document.getElementById('opp-status-label').textContent = 'Waiting...';
+  const board = document.getElementById('opp-mini-board');
+  board.innerHTML = '';
+  for (let r=0;r<6;r++){
+    const row = document.createElement('div');
+    row.className = 'opp-row';
+    row.id = 'opp-row-' + r;
+    for (let c=0;c<5;c++){
+      const t = document.createElement('div');
+      t.className = 'opp-tile';
+      t.id = 'opp-tile-' + r + '-' + c;
+      row.appendChild(t);
+    }
+    board.appendChild(row);
+  }
+}
+
+function startPollOpponent() {
+  stopPoll();
+  onlinePollTimer = setInterval(pollOpponent, 2000);
+}
+
+async function pollOpponent() {
+  if (!onlineRoomCode || !onlineMode) return;
+  try {
+    const r = await fetch(WORKER + '/room/' + onlineRoomCode);
+    const data = await r.json();
+    const oppSlot = String(onlinePlayerSlot === 1 ? 2 : 1);
+    const opp = data.players[oppSlot];
+    if (!opp) return;
+    // Update mini board
+    opp.board.forEach((rowFb, ri) => {
+      rowFb.forEach((result, ci) => {
+        const tile = document.getElementById('opp-tile-' + ri + '-' + ci);
+        if (tile) { tile.className = 'opp-tile ' + result; }
+      });
+    });
+    // Update status
+    const statusEl = document.getElementById('opp-status-label');
+    if (opp.done) {
+      onlineOpponentDone = true;
+      statusEl.textContent = opp.won
+        ? opp.name + ' won in ' + opp.guessCount + '!'
+        : opp.name + ' ran out of guesses';
+      stopPoll();
+    } else {
+      statusEl.textContent = opp.guessCount + ' guess' + (opp.guessCount!==1?'es':'') + ' so far';
+    }
+    // If game done server-side and we're also done — show online result
+    if (data.status === 'done' && gameOver && data.word) {
+      showOnlineResult(data);
+    }
+  } catch(e) {}
+}
+
+function showOnlineResult(data) {
+  stopPoll();
+  const mySlot = String(onlinePlayerSlot);
+  const oppSlot = String(onlinePlayerSlot === 1 ? 2 : 1);
+  const me = data.players[mySlot];
+  const opp = data.players[oppSlot];
+  if (!me || !opp) return;
+  const myGuesses = me.guessCount || 7;
+  const oppGuesses = opp.guessCount || 7;
+  const iWon = me.won && (!opp.won || myGuesses <= oppGuesses);
+  document.getElementById('rr-title').innerHTML = iWon ? 'You won! &#x1F3C6;' : oppGuesses < myGuesses || !me.won ? opp.name + ' wins!' : "It's a tie! &#x1F91D;";
+  document.getElementById('rr-subtitle').textContent = 'The word was: ' + (data.word||'').toUpperCase();
+  const playersDiv = document.getElementById('rr-players');
+  playersDiv.innerHTML = '';
+  [[mySlot, me, iWon], [oppSlot, opp, !iWon && opp.won]].forEach(([slot, p, winner]) => {
+    if (!p) return;
+    const div = document.createElement('div');
+    div.className = 'rr-player' + (winner ? ' winner' : '');
+    const gc = p.won ? p.guessCount + ' guess' + (p.guessCount!==1?'es':'') : 'X';
+    div.innerHTML = '<div class="rr-player-name">' + p.name + '</div><div class="rr-player-guesses">' + gc + '</div><div class="rr-player-label">' + (p.won ? 'Got it!' : 'Did not get it') + '</div>';
+    playersDiv.appendChild(div);
+  });
+  document.getElementById('session-tally').style.display = 'none';
+  document.getElementById('tally-detail').innerHTML = '';
+  show('round-result');
+  iWon ? launchHearts() : launchBrokenHearts();
+}
+
+// Override nextPartnerRound for online mode
+const _origNextPartnerRound = window.nextPartnerRound;
+
 // -- Game Logger ──────────────────────────────────────────────
 const LOG_URL = 'https://lovedle-logs.kapluie-workers.workers.dev/log';
 async function logGame(won, guessCount) {
