@@ -824,15 +824,17 @@ function launchHearts() {
 // ── Share ─────────────────────────────────────────────────────
 // -- Online Multiplayer ────────────────────────────────────────
 const WORKER = 'https://lovedle-logs.kapluie-workers.workers.dev';
+function createOnlineRoom() { createRoom(); }
+function joinOnlineRoom() { joinRoom(); }
 function showOnlineMenu() {
   document.getElementById('online-error').textContent = '';
-  document.getElementById('online-name').value = names.p1 !== 'Player 1' ? names.p1 : '';
-  document.getElementById('join-code').value = '';
+  document.getElementById('online-name-input').value = names.p1 !== 'Player 1' ? names.p1 : '';
+  document.getElementById('join-code-input').value = '';
   show('online-menu');
 }
 
 async function createRoom() {
-  const playerName = document.getElementById('online-name').value.trim() || 'Player 1';
+  const playerName = document.getElementById('online-name-input').value.trim() || 'Player 1';
   const errEl = document.getElementById('online-error');
   errEl.textContent = 'Creating room...';
   try {
@@ -866,8 +868,8 @@ async function createRoom() {
 }
 
 async function joinRoom() {
-  const code = document.getElementById('join-code').value.trim().toUpperCase();
-  const playerName = document.getElementById('online-name').value.trim() || 'Player 2';
+  const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+  const playerName = document.getElementById('online-name-input').value.trim() || 'Player 2';
   const errEl = document.getElementById('online-error');
   if (code.length !== 5) { errEl.textContent = 'Enter the 5-letter room code.'; return; }
   errEl.textContent = 'Joining...';
